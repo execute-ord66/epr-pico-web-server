@@ -1,6 +1,6 @@
 <p id="colString"><!--#colours--></p>
 <p>State: <!--#state--></p>
-<p>Latest rotation: <!--#rot--> deg</p>
-<p>Tangental wheel speed (L/R): <!--#tan--> mm/s</p>
-<p>Distance convered: <!--#dist--> mm</p>
-<p>Latest Incidence Angle: <!--#ang--> deg</p>
+<p>θ<sub>i</sub>: <!--#ang-->°</p>
+<p>θ<sub>MDPS</sub>: <!--#rot-->°</p>
+<p>Speed: <!--#tan--> <sup>mm</sup>&frasl;<sub>s</sub></p>
+<p>Distance convered: <!--#dist--> <sup>mm</sup>&frasl;<sub>s</sub></p>
