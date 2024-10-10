@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "hardware/adc.h"
 
 
 void process_packet(const uint8_t *buffer) {
