@@ -225,7 +225,7 @@ int main() {
 
 
                         if (blHasStopped) {
-                            if (distance >= 40 || (last_distance %210 >= 119 && blQTP2_instantDistance && blQTP3_FirstReverse)) {
+                            if (distance >= 39 || (last_distance %210 >= 119 && blQTP2_instantDistance && blQTP3_FirstReverse)) {
                                stop();
                                angle = 46;
                                internal_state = DETERMINE_COLOUR;

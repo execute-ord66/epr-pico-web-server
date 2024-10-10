@@ -1,11 +1,6 @@
-<p>CPU Temp: <!--#temp--> C</p>
-<p>LED is: <!--#led--></p>
-<p>Packet#: <!--#packet--></p>
 <p id="colString"><!--#colours--></p>
 <p>State: <!--#state--></p>
 <p>Latest rotation: <!--#rot--> deg</p>
 <p>Tangental wheel speed (L/R): <!--#tan--> mm/s</p>
 <p>Distance convered: <!--#dist--> mm</p>
 <p>Latest Incidence Angle: <!--#ang--> deg</p>
-<p>Latest Debug Message:</p>
-<h3><!--#debug--></h3>
