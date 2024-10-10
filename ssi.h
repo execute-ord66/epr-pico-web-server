@@ -20,7 +20,7 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
                 if (current_state != STATE_MAZE)
                     printed = snprintf(pcInsert, iInsertLen, "%s", state_strings[current_state]);
                 else
-                    printed = snprintf(pcInsert, iInsertLen, "%s - %d", state_strings[current_state], internal_state_strings[internal_state]);
+                    printed = snprintf(pcInsert, iInsertLen, "%s - %s", state_strings[current_state], internal_state_strings[internal_state]);
             }
             break;
         case 2: // rot

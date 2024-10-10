@@ -5,8 +5,8 @@
 #include "pico/cyw43_arch.h"
 
 // Settings
-const char WIFI_SSID[] = "Onsen";
-const char WIFI_PASSWORD[] = "karapara";
+const char WIFI_SSID[] = "Bath";
+const char WIFI_PASSWORD[] = "soap&water";
 const float conversion_factor = 3.3f / (1 << 12);
 bool UseHub = true;
 

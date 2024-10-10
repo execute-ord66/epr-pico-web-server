@@ -55,6 +55,7 @@ target_link_libraries(${PROGRAM_NAME}
     pico_stdlib
     pico_cyw43_arch_lwip_threadsafe_background
     pico_lwip_http
+    pico_lwip_mdns
     hardware_uart
     # pico_httpd_content
     hardware_adc
