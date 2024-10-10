@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <title>Group 6 - EPR320</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover-color: #45a049;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --container-width: 600px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        h1 {
+            background-color: var(--text-color);
+            color: white;
+            padding: 1rem;
+            margin: 0;
+        }
+
+        .container {
+            max-width: var(--container-width);
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover-color);
+        }
+
+        #toggleButton {
+            background-color: #f44336;
+        }
+
+        #toggleButton:hover {
+            background-color: #e53935;
+        }
+
+        #sen {
+            display: flex;
+            justify-content: center;
+        }
+
+        .square {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            border: 2px solid black;
+        }
+
+        #colString {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+            }
+
+            button {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>SNC Control Page</h1>
+    <div class="container">
+        <h2>Stats</h2>
+        <div id="sen">
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+            <div class="square"></div>
+        </div>
+        <div id="content"></div>
+        <button id="refreshButton">Refresh</button>
+        <button id="toggleButton">Start Auto Refresh</button>
+        <h2>Triggers</h2>
+        <button id="ledOn">LED ON</button>
+        <button id="ledOff">LED OFF</button>
+        <button id="triggerPeak">Enable Peak Detection</button>
+        <button id="reset">Reset</button>
+        <button id="start">Touch</button>
+    </div>
+
+    <script>
+        const colorMap = {
+            '0': 'white',
+            '1': 'red',
+            '2': 'green',
+            '3': 'blue',
+            '4': 'black',
+        };
+
+        let refreshInterval;
+        let prevColors = '';
+
+        const updateSquares = (colorString) => {
+            if (colorString === prevColors) return;
+
+            document.querySelectorAll('.square').forEach((square, index) => { 
+                square.style.backgroundColor = colorMap[colorString[index]] || ''; 
+            });
+
+            prevColors = colorString;
+        };
+
+        const refreshContent = async () => {
+            try {
+                const response = await fetch('/content.shtml');
+                const data = await response.text();
+                document.getElementById('content').innerHTML = data;
+                const colorString = document.getElementById('colString').textContent.trim();
+                updateSquares(colorString);
+            } catch (error) {
+                console.error('Error refreshing content:', error);
+            }
+        };
+
+        const sendCgi = async (url) => {
+            try {
+                const response = await fetch(url);
+                const data = await response.text();
+                document.getElementById('content').innerHTML = data;
+                const colorString = document.getElementById('colString').textContent.trim();
+                updateSquares(colorString);
+            } catch (error) {
+                console.error('Error sending CGI request:', error);
+            }
+        };
+
+        const toggleAutoRefresh = () => {
+            const toggleButton = document.getElementById('toggleButton');
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+                toggleButton.textContent = 'Start Auto Refresh';
+                toggleButton.style.backgroundColor = '#4CAF50';
+            } else {
+                refreshInterval = setInterval(refreshContent, 500);
+                toggleButton.textContent = 'Stop Auto Refresh';
+                toggleButton.style.backgroundColor = '#f44336';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshContent();
+
+            document.getElementById('refreshButton').addEventListener('click', refreshContent);
+            document.getElementById('toggleButton').addEventListener('click', toggleAutoRefresh);
+
+            document.getElementById('ledOn').addEventListener('click', () => sendCgi('/led.cgi?led=1'));
+            document.getElementById('ledOff').addEventListener('click', () => sendCgi('/led.cgi?led=0'));
+            document.getElementById('triggerPeak').addEventListener('click', () => sendCgi('/peak.cgi?peak=1'));
+            document.getElementById('start').addEventListener('click', () => sendCgi('/start.cgi?start=1'));
+            document.getElementById('reset').addEventListener('click', () => sendCgi('/reset.cgi?reset=1'));
+        });
+    </script>
+</body>
+</html>

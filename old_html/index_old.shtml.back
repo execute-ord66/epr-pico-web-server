@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head> 
+        <title>SNC Control Page</title> 
+        <meta http-equiv="refresh" content="1">
+    </head>
+    <body>
+        <h1>SNC Control Page</h1>
+        <br>
+        <p>Voltage: <!--#volt--></p>
+        <p>Temp: <!--#temp--> C</p>
+        <p>LED is: <!--#led--></p>
+        <p>Latest Packet is: <!--#packet--></p>
+        <br>
+        <br>
+        <a href="/index.shtml">Refresh</a>
+        <br>
+        <h2>Triggers</h2>
+        <a href="/led.cgi?led=1"><button>LED ON</button></a>
+        <a href="/led.cgi?led=0"><button>LED OFF</button></a>
+        <a href="/peak.cgi?peak=0"><button>Clear Peak Detection</button></a>
+        <a href="/peak.cgi?peak=1"><button>Trigger Peak Detection</button></a>
+        <a href="/start.cgi?start=1"><button>Start</button></a>
+   </body>
+</html>
