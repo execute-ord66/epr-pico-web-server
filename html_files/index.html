@@ -94,7 +94,7 @@
     </style>
 </head>
 <body>
-    <h1>SNC Control Page</h1>
+    <h1>Group 6 - MARV</h1>
     <div class="container">
         <h2>Stats</h2>
         <div id="sen">
@@ -106,7 +106,7 @@
         </div>
         <div id="content"></div>
         <button id="refreshButton">Refresh</button>
-        <button id="toggleButton">Start Auto Refresh</button>
+        <button id="toggleButton">Stop Auto Refresh</button>
         <h2>Triggers</h2>
         <button id="ledOn">LED ON</button>
         <button id="ledOff">LED OFF</button>
@@ -124,7 +124,7 @@
             '4': 'black',
         };
 
-        let refreshInterval;
+        let refreshInterval = setInterval(refreshContent, 500);
         let prevColors = '';
 
         const updateSquares = (colorString) => {
@@ -176,14 +176,12 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            refreshContent();
-
             document.getElementById('refreshButton').addEventListener('click', refreshContent);
             document.getElementById('toggleButton').addEventListener('click', toggleAutoRefresh);
 
             document.getElementById('ledOn').addEventListener('click', () => sendCgi('/led.cgi?led=1'));
             document.getElementById('ledOff').addEventListener('click', () => sendCgi('/led.cgi?led=0'));
-            document.getElementById('triggerPeak').addEventListener('click', () => sendCgi('/peak.cgi?peak=1'));
+            // document.getElementById('triggerPeak').addEventListener('click', () => sendCgi('/peak.cgi?peak=1'));
             document.getElementById('start').addEventListener('click', () => sendCgi('/start.cgi?start=1'));
             document.getElementById('reset').addEventListener('click', () => sendCgi('/reset.cgi?reset=1'));
         });

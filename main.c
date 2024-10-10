@@ -110,6 +110,9 @@ void uart_rx_interrupt() {
 }
 void WaitForTurn() {
     while(!blMyTurn) {
+#if PICO_CYW43_ARCH_POLL
+        cyw43_arch_poll();
+#endif
         sleep_ms(30);
     }
     blMyTurn = false;
@@ -119,6 +122,9 @@ void WaitForTurnWithTimeout() {
     static const uint32_t timeout_ms = 1000;
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
     while(!blMyTurn && absolute_time_diff_us(get_absolute_time(), start_time) < timeout_ms) {
+#if PICO_CYW43_ARCH_POLL
+        cyw43_arch_poll();
+#endif
         sleep_ms(30);
     }
     blMyTurn = false;
@@ -182,6 +188,9 @@ int main() {
     WaitForTurn();
     blEOM = false;
     while(true) {
+#if PICO_CYW43_ARCH_POLL
+        cyw43_arch_poll();
+#endif
         switch (current_state) {
             case STATE_IDLE:
                 while(blEOM && UseHub) {
