@@ -407,14 +407,14 @@ int main() {
                 WaitForTurnWithTimeout();
                 tempBool = false;
                 while(!tempBool) {
-                    tempBool = (adc_read()*conversion_factor > 3);
+                    sleep_ms(1000);
+                    tempBool = (adc_read()*conversion_factor < 3);
                     send_packet(STATE_SOS << 6 | PACKET_SNC << 4 | 0, tempBool, 0, 0);
                     if (tempBool) {
                         current_state = STATE_MAZE;
                         blPeak = false;
                         blMyTurn = true;
                     }
-                    sleep_ms(20);
                 }
                 break;
         }
