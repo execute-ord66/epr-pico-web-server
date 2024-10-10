@@ -35,6 +35,9 @@ u16_t ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
             break;
         case 4: // dist
             {
+                if (internal_state == REVERSING) {
+                    printed = snprintf(pcInsert, iInsertLen, "%d/%d", last_distance, reverse_distance);
+                }
                 printed = snprintf(pcInsert, iInsertLen, "%d", last_distance);
             }
             break;  

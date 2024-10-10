@@ -124,8 +124,9 @@
             '4': 'black',
         };
 
-        let refreshInterval = setInterval(refreshContent, 500);
+        let refreshInterval;
         let prevColors = '';
+        let prevStatetext = '';
 
         const updateSquares = (colorString) => {
             if (colorString === prevColors) return;
@@ -143,7 +144,34 @@
                 const data = await response.text();
                 document.getElementById('content').innerHTML = data;
                 const colorString = document.getElementById('colString').textContent.trim();
-                updateSquares(colorString);
+                const stateElement = await document.getElementById("stateName");
+                if (stateElement) {
+                    const stateText = await stateElement.textContent.trim();
+                    // Check if the state is "IDLE" or "CAL"
+                    if (stateText == "State: IDLE" || stateText == "State: CAL") {
+                        // Get all elements with class "maze" and hide them
+                        const mazeElements = document.querySelectorAll(".maze");
+                        mazeElements.forEach((element) => {
+                            element.style.display = "none";
+                        });
+                    } else {
+                        //Show maze
+                        const mazeElements = document.querySelectorAll(".maze");
+                        
+                    }
+
+                    if (stateText == "State: IDLE") {
+                        //Don't show sen
+                        const senElement = document.getElementById("sen");
+                        senElement.style.display = "none";
+                    } else {
+                        //Show sen
+                        const senElement = document.getElementById("sen");
+                        senElement.style.display = "flex";
+                    }
+                    updateSquares(colorString);
+                }
+                
             } catch (error) {
                 console.error('Error refreshing content:', error);
             }
@@ -176,6 +204,7 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            refreshInterval = setInterval(refreshContent, 500)
             document.getElementById('refreshButton').addEventListener('click', refreshContent);
             document.getElementById('toggleButton').addEventListener('click', toggleAutoRefresh);
 
