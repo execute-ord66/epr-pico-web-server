@@ -7,6 +7,7 @@
 #define PARITY    UART_PARITY_NONE
 
 #define BUFFER_SIZE 4
+#define PeakThreshold 2.2f
 #include <stdlib.h>
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
@@ -406,14 +407,19 @@ int main() {
             case STATE_SOS:
                 WaitForTurnWithTimeout();
                 tempBool = false;
-                while(!tempBool) {
+                while(true) {
                     sleep_ms(1000);
-                    tempBool = (adc_read()*conversion_factor < 3);
+                    static const uint32_t timeout_ms = 2;
+                    uint32_t start_time = to_ms_since_boot(get_absolute_time());
+                    while(absolute_time_diff_us(get_absolute_time(), start_time) < timeout_ms) {
+                        tempBool = (adc_read()*conversion_factor > PeakThreshold) || tempBool;
+                    }
                     send_packet(STATE_SOS << 6 | PACKET_SNC << 4 | 0, tempBool, 0, 0);
-                    if (tempBool) {
+                    if (!tempBool) {
                         current_state = STATE_MAZE;
                         blPeak = false;
                         blMyTurn = true;
+                        break;
                     }
                 }
                 break;
