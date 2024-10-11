@@ -148,6 +148,7 @@ bool check_peak_and_touch() {
 
 bool check_condition(uint8_t packet_type, uint8_t condition_number, bool *condition) {
     bool temp_condition = *condition;
+    if (blEOM = true) return false;
     send_packet(STATE_MAZE << 6 | packet_type << 4 | condition_number, temp_condition, 0, 0);
     if (temp_condition) {
         *condition = false;
@@ -165,12 +166,14 @@ void rotate(uint16_t angle) {
 
 void move_forward(uint8_t speed) {
     printf("Moving forward at %d mm/s\n", speed);
+    if (blEOM = true) return false;
     send_packet(0x93, speed, speed, 0);
     blMyTurn = false;
 }
 
 void move_backward(uint8_t speed) {
     printf("Moving backwards at %d mm/s\n", speed);
+    if (blEOM = true) return false;
     send_packet(0x93, speed, speed, 1);
     blMyTurn = false;
 }
@@ -181,6 +184,7 @@ void calculate_reverse_distance(uint8_t angle) {
 
 void stop() {
     printf("Stopping\n");
+    if (blEOM = true) return false;
     send_packet(0x93, 0, 0, 0);
     blMyTurn = false;
 }

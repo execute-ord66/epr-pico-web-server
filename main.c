@@ -7,7 +7,7 @@
 #define PARITY    UART_PARITY_NONE
 
 #define BUFFER_SIZE 4
-#define PeakAmplitude 2.2f
+#define PeakAmplitude 1.1f
 #include <stdlib.h>
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
@@ -289,7 +289,7 @@ int main() {
 
 
                         if (blHasStopped) {
-                            if (distance >= 39 || (last_distance %210 >= 119 && blQTP2_instantDistance && blQTP3_FirstReverse)) {
+                            if (distance >= 39 || (last_distance >= 119 && blQTP2_instantDistance && blQTP3_FirstReverse)) {
                                stop();
                                angle = 46;
                                internal_state = DETERMINE_COLOUR;
@@ -430,7 +430,7 @@ int main() {
                 }
                 break;
         }
-        sleep_ms(300);
+        sleep_ms(350);
 
         if (blReset) {
             blReset = false || (current_state != STATE_IDLE);
