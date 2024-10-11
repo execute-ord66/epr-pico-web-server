@@ -116,11 +116,16 @@ void send_packet(uint8_t control, uint8_t dat1, uint8_t dat0, uint8_t dec) {
 
 bool check_peak_and_touch() {
     bool blPeak =  false;
-    static const uint32_t timeout_ms = 2;
-    uint32_t start_time = to_ms_since_boot(get_absolute_time());
-    while(absolute_time_diff_us(get_absolute_time(), start_time) < timeout_ms) {
-        blPeak = (adc_read()*conversion_factor > PeakThreshold) || blPeak;
+    float_t max = 0;
+    float_t min = 3.3;
+    int count = 0;
+    while(count < 1000 && !blPeak) {
+        float_t voltage = adc_read() * conversion_factor;
+        max = fmax(max, voltage);
+        min = fmin(min, voltage);
+        count++;
     }
+    blPeak = (max - min > PeakAmplitude);
     bool Temp = blPeak;
     // printf("Checked Peaking %d\n", Temp);
     if (check_condition(PACKET_SNC, 1, &Temp)) {

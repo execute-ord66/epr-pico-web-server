@@ -7,7 +7,7 @@
 #define PARITY    UART_PARITY_NONE
 
 #define BUFFER_SIZE 4
-#define PeakThreshold 2.2f
+#define PeakAmplitude 2.2f
 #include <stdlib.h>
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
@@ -409,11 +409,17 @@ int main() {
                 tempBool = false;
                 while(true) {
                     sleep_ms(1000);
-                    static const uint32_t timeout_ms = 2;
-                    uint32_t start_time = to_ms_since_boot(get_absolute_time());
-                    while(absolute_time_diff_us(get_absolute_time(), start_time) < timeout_ms) {
-                        tempBool = (adc_read()*conversion_factor > PeakThreshold) || tempBool;
+                    bool blPeak =  false;
+                    float_t max = 0;
+                    float_t min = 3.3;
+                    uint16_t count = 0;
+                    while(count < 1000 && !blPeak) {
+                        float_t voltage = adc_read() * conversion_factor;
+                        max = fmax(max, voltage);
+                        min = fmin(min, voltage);
+                        count++;
                     }
+                    blPeak = (max - min > PeakAmplitude);
                     send_packet(STATE_SOS << 6 | PACKET_SNC << 4 | 0, tempBool, 0, 0);
                     if (!tempBool) {
                         current_state = STATE_MAZE;
