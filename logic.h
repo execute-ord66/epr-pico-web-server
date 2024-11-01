@@ -8,10 +8,10 @@
 const char WIFI_SSID[] = "Onsen";
 const char WIFI_PASSWORD[] = "karapara";
 const float conversion_factor = 3.3f / (1 << 12);
-bool UseHub = true;
+bool UseHub = false;
 
-const uint8_t fast_speed = 100; //mm/s
-const uint8_t slow_speed = 50; //mm/s
+const uint8_t fast_speed = 40; //mm/s
+const uint8_t slow_speed = 30; //mm/s
 const uint8_t angle_to_reverse[46] = {45, 45, 44, 44, 44, 44, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43,
        44, 44, 44, 44, 45, 45, 46, 46, 47, 47, 48, 48, 49, 50, 50, 51, 52,
        53, 54, 55, 56, 58, 59, 60, 62, 63, 65, 67, 69};

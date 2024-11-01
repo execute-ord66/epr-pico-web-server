@@ -1,7 +1,10 @@
-#define UART_ID uart0
+#define UART0_ID uart0
+#define UART1_ID uart1
 #define BAUD_RATE 19200
-#define UART_TX_PIN 0
-#define UART_RX_PIN 1
+#define UART0_TX_PIN 0
+#define UART0_RX_PIN 1
+#define UART1_TX_PIN 4
+#define UART1_RX_PIN 5
 #define DATA_BITS 8
 #define STOP_BITS 1
 #define PARITY    UART_PARITY_NONE
@@ -87,34 +90,64 @@ u16_t distance = 0;
 
 void init_uart() {
     // uart_init(UART_ID, 2400);
-    uart_init(UART_ID, BAUD_RATE);
-    gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
-    gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
+    uart_init(UART0_ID, BAUD_RATE);
+    gpio_set_function(UART0_TX_PIN, UART_FUNCSEL_NUM(UART0_ID, UART_TX0_PIN));
+    gpio_set_function(UART0_RX_PIN, UART_FUNCSEL_NUM(UART0_ID, UART_TX0_PIN));
     // uart_set_hw_flow(UART_ID, false, false);
-    uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+    uart_set_format(UART0_ID, DATA_BITS, STOP_BITS, PARITY);
+
+    uart_init(UART1_ID, BAUD_RATE);
+    gpio_set_function(UART1_TX_PIN, UART_FUNCSEL_NUM(UART1_ID, UART1_TX_PIN));
+    gpio_set_function(UART1_RX_PIN, UART_FUNCSEL_NUM(UART1_ID, UART1_TX_PIN));
+    // uart_set_hw_flow(UART_ID, false, false);
+    uart_set_format(UART1_ID, DATA_BITS, STOP_BITS, PARITY);
 
 }
 
-void uart_rx_interrupt() {
-    while (uart_is_readable(UART_ID)) {
-        static uint8_t buffer[4];
-        static uint8_t buffer_index = 0;
+void uart_rx0_interrupt() {
+    while (uart_is_readable(UART0_ID)) {
+        static uint8_t buffer0[4];
+        static uint8_t buffer0_index = 0;
 
-        buffer[buffer_index++] = uart_getc(UART_ID);
+        buffer0[buffer0_index++] = uart_getc(UART0_ID);
 
-        if (buffer_index == 4) {
+        if (buffer0_index == 4) {
             // printf("Received packet: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-            process_packet(buffer);
-            buffer_index = 0;
+            process_packet(buffer0);
+            buffer0_index = 0;
+            uart_putc_raw(UART1_ID, buffer0[0]);
+            uart_putc_raw(UART1_ID, buffer0[1]);
+            uart_putc_raw(UART1_ID, buffer0[2]);
+            uart_putc_raw(UART1_ID, buffer0[3]);
         }
     }
 }
+
+void uart_rx1_interrupt() {
+    while (uart_is_readable(UART1_ID)) {
+        static uint8_t buffer1[4];
+        static uint8_t buffer1_index = 0;
+
+        buffer1[buffer1_index++] = uart_getc(UART1_ID);
+
+        if (buffer1_index == 4) {
+            // printf("Received packet: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+            process_packet(buffer1);
+            buffer1_index = 0;
+            uart_putc_raw(UART0_ID, buffer1[0]);
+            uart_putc_raw(UART0_ID, buffer1[1]);
+            uart_putc_raw(UART0_ID, buffer1[2]);
+            uart_putc_raw(UART0_ID, buffer1[3]);
+        }
+    }
+}
+
 void WaitForTurn() {
     while(!blMyTurn) {
 #if PICO_CYW43_ARCH_POLL
         cyw43_arch_poll();
 #endif
-        sleep_ms(30);
+        sleep_ms(3);
     }
     blMyTurn = false;
 }
@@ -126,16 +159,33 @@ void WaitForTurnWithTimeout() {
 #if PICO_CYW43_ARCH_POLL
         cyw43_arch_poll();
 #endif
-        sleep_ms(30);
+        sleep_ms(3);
     }
     blMyTurn = false;
+}
+bool checkPeaking() {
+    gpio_put(23, 1);
+    sleep_ms(1);
+    float_t max = 0;
+    float_t min = 3.3;
+    uint16_t count = 0;
+    while(count < 266 && !blPeak) { //266 is the amount of points needed to sample roughly two periods of my 2.8kHz signal, with some margin
+        float_t voltage = adc_read() * conversion_factor;
+        max = fmax(max, voltage);
+        min = fmin(min, voltage);
+        count++;
+    }
+    gpio_put(23, 0);
+    return (max - min > PeakAmplitude*2); //Amplitude is half the range of the signal
 }
 
 int main() {
     stdio_init_all();
-    adc_init();
-    adc_gpio_init(26);
-    adc_select_input(0);
+    // gpio_init(23); //Power-saving Pin. Disable when reading ADC
+    gpio_set_dir(23, GPIO_OUT);
+    // adc_init();
+    // adc_gpio_init(26);
+    // adc_select_input(0);
 
     //Networking
     cyw43_arch_init();
@@ -147,9 +197,13 @@ int main() {
     netif_set_hostname(&cyw43_state.netif[CYW43_ITF_STA], hostname);
 
     init_uart();
-    irq_set_exclusive_handler(UART0_IRQ, uart_rx_interrupt);
+    irq_set_exclusive_handler(UART0_IRQ, uart_rx0_interrupt);
     irq_set_enabled(UART0_IRQ, true);
-    uart_set_irq_enables(UART_ID, true, false);
+    uart_set_irq_enables(UART0_ID, true, false);
+
+    irq_set_exclusive_handler(UART1_IRQ, uart_rx1_interrupt);
+    irq_set_enabled(UART1_IRQ, true);
+    uart_set_irq_enables(UART1_ID, true, false);
 
     while(cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 3000) != 0) {
         printf("Failed to connect to WiFi network\n");
@@ -262,6 +316,7 @@ int main() {
                         internal_state = DETERMINE_COLOUR;
                         
                     } else if (sensor_colours[3] != COLOUR_WHITE) {
+
                         colour = sensor_colours[3];
                         if (last_angle <=5 && (colour == COLOUR_RED || colour == COLOUR_GREEN)) {
                             move_forward(fast_speed);
@@ -406,25 +461,13 @@ int main() {
               break;   
             case STATE_SOS:
                 WaitForTurnWithTimeout();
-                tempBool = false;
                 while(true) {
                     sleep_ms(1000);
                     bool blPeak =  false;
-                    float_t max = 0;
-                    float_t min = 3.3;
-                    uint16_t count = 0;
-                    while(count < 1000 && !blPeak) {
-                        float_t voltage = adc_read() * conversion_factor;
-                        max = fmax(max, voltage);
-                        min = fmin(min, voltage);
-                        count++;
-                    }
-                    blPeak = (max - min > PeakAmplitude);
-                    send_packet(STATE_SOS << 6 | PACKET_SNC << 4 | 0, tempBool, 0, 0);
-                    if (!tempBool) {
-                        current_state = STATE_MAZE;
-                        blPeak = false;
-                        blMyTurn = true;
+                    blPeak = checkPeaking();
+                    send_packet(STATE_SOS << 6 | PACKET_SNC << 4 | 1, blPeak, 0, 0);
+                    if (!blPeak) {
+                        tempBool = true;
                         break;
                     }
                 }

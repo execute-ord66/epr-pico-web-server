@@ -43,6 +43,7 @@
         "stdlib.h": "c",
         "cyw43_arch.h": "c",
         "lwipopts.h": "c",
-        "ssi.h": "c"
+        "ssi.h": "c",
+        "limits": "c"
     }
 }
