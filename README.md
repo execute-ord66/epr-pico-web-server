@@ -12,7 +12,7 @@ Welcome to the Group 56 State and Navigation Control (SNC) Pico W code repositor
 ### Installation
 1. Clone this repository to your local machine:
     ```sh
-    git clone https://github.com/yourusername/your-repo-name.git
+    git clone https://github.com/execute-ord66/epr-pico-web-server/blob/master/
     ```
 2. Open the project in VSCode.
 3. Ensure you have the Raspberry Pi Pico SDK and the official extension installed.
